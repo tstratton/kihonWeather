@@ -6,14 +6,17 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
+
+import net.devrand.kihon.kihonweather.data.AllData;
 
 import java.io.IOException;
 
@@ -22,7 +25,7 @@ public class WeatherActivity extends AppCompatActivity {
     TextView textView;
 
     private static final String TAG = "WeatherActivity";
-    private static final String BASE_URL = "http://api.wunderground.com/api/%s/conditions/forecast/q/%s/%s.json";
+    private static final String BASE_URL = "http://api.wunderground.com/api/%s/conditions/forecast/astronomy/q/%s/%s.json";
 
     private static final String API_KEY = "XXXX_WUNDERGROUND_API_KEY_XXXX";
     private static final String STATE_STRING = "CA";
@@ -68,8 +71,8 @@ public class WeatherActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private class GetDataTask extends AsyncTask<String, Integer, String> {
-        protected String doInBackground(String... urls) {
+    private class GetDataTask extends AsyncTask<String, Integer, AllData> {
+        protected AllData doInBackground(String... urls) {
             OkHttpClient client = new OkHttpClient();
             Response response;
 
@@ -84,8 +87,11 @@ public class WeatherActivity extends AppCompatActivity {
             try {
                 response = client.newCall(request).execute();
                 String json = response.body().string();
-                return String.format("%d chars\n%s\nAPI key '%s'\nResult for %s, %s\n%s",
-                        json.length(), urls[0], urls[1], urls[2], urls[3], json);
+
+                Gson gson = new Gson();
+                AllData data = gson.fromJson(json, AllData.class);
+
+                return data;
             } catch (IOException ex) {
                 ex.printStackTrace();
                 return null;
@@ -100,8 +106,34 @@ public class WeatherActivity extends AppCompatActivity {
             textView.setText("Getting Data..");
         }
 
-        protected void onPostExecute(String result) {
-            textView.setText(result);
+        protected void onPostExecute(AllData data) {
+            StringBuilder text = new StringBuilder();
+            try {
+                text.append(data.current_observation.display_location.full);
+                text.append("\n");
+                text.append(data.current_observation.temperature_string);
+                text.append("\n");
+                text.append(data.current_observation.weather);
+                text.append("\nSunrise ");
+                text.append(data.sun_phase.getSunrise());
+                text.append("\nSunset ");
+                text.append(data.sun_phase.getSunset());
+                text.append("\n");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                text = new StringBuilder();
+                text.append("Error getting data:\n");
+                text.append(ex.toString());
+                text.append("\n");
+            }
+
+            text.append("\n----- ----- ----- -----\n");
+            text.append("API key '");
+            text.append(API_KEY);
+            text.append("'\n");
+            text.append(BASE_URL);
+            text.append("\n");
+            textView.setText(text);
         }
     }
 }
