@@ -110,26 +110,34 @@ public class WeatherActivity extends AppCompatActivity {
         protected void onPostExecute(AllData data) {
             StringBuilder text = new StringBuilder();
             try {
-                text.append(data.current_observation.display_location.full);
-                text.append("\n");
-                text.append(data.current_observation.temperature_string);
-                text.append("\n");
-                text.append(data.current_observation.weather);
-                text.append("\nSunrise ");
-                text.append(data.sun_phase.getSunrise());
-                text.append("\nSunset ");
-                text.append(data.sun_phase.getSunset());
-                text.append("\n");
+                if (data.hasError()) {
+                    text.append("Got error\n");
+                    text.append(data.getError().type);
+                    text.append("\n");
+                    text.append(data.getError().description);
+                    text.append("\n");
+                } else {
+                    text.append(data.current_observation.display_location.full);
+                    text.append("\n");
+                    text.append(data.current_observation.temperature_string);
+                    text.append("\n");
+                    text.append(data.current_observation.weather);
+                    text.append("\nSunrise ");
+                    text.append(data.sun_phase.getSunrise());
+                    text.append("\nSunset ");
+                    text.append(data.sun_phase.getSunset());
+                    text.append("\n");
 
-                text.append("\nForecast:\n");
-                for (Forecast.TextForecastDay forecast : data.forecast.txt_forecast.forecastday) {
-                    text.append(forecast.title);
-                    text.append("\n");
-                    text.append(forecast.fcttext);
-                    text.append("\n");
-                    text.append(forecast.pop);
-                    text.append("% chance of precipitation\n");
-                    text.append("\n");
+                    text.append("\nForecast:\n");
+                    for (Forecast.TextForecastDay forecast : data.forecast.txt_forecast.forecastday) {
+                        text.append(forecast.title);
+                        text.append("\n");
+                        text.append(forecast.fcttext);
+                        text.append("\n");
+                        text.append(forecast.pop);
+                        text.append("% chance of precipitation\n");
+                        text.append("\n");
+                    }
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
