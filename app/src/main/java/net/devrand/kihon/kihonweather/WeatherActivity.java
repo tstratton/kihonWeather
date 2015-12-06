@@ -17,6 +17,7 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
 import net.devrand.kihon.kihonweather.data.AllData;
+import net.devrand.kihon.kihonweather.data.Forecast;
 
 import java.io.IOException;
 
@@ -119,6 +120,17 @@ public class WeatherActivity extends AppCompatActivity {
                 text.append("\nSunset ");
                 text.append(data.sun_phase.getSunset());
                 text.append("\n");
+
+                text.append("\nForecast:\n");
+                for (Forecast.TextForecastDay forecast : data.forecast.txt_forecast.forecastday) {
+                    text.append(forecast.title);
+                    text.append("\n");
+                    text.append(forecast.fcttext);
+                    text.append("\n");
+                    text.append(forecast.pop);
+                    text.append("% chance of precipitation\n");
+                    text.append("\n");
+                }
             } catch (Exception ex) {
                 ex.printStackTrace();
                 text = new StringBuilder();
