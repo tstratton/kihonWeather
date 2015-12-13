@@ -9,6 +9,7 @@ public class AllData {
     public Forecast forecast;
     public Astronomy moon_phase;
     public Astronomy sun_phase;
+    public Hourly hourly_forecast[];
 
     public boolean hasError() {
         return response == null || response.error != null;
@@ -27,4 +28,11 @@ public class AllData {
         public String type;
         public String description;
     }
+
+    public class Hourly {
+        public int pop;
+        public Measure temp;
+        public String condition;
+    }
+
 }

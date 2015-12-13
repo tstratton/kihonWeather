@@ -26,7 +26,7 @@ public class WeatherActivity extends AppCompatActivity {
     TextView textView;
 
     private static final String TAG = "WeatherActivity";
-    private static final String BASE_URL = "http://api.wunderground.com/api/%s/conditions/forecast/astronomy/q/%s/%s.json";
+    private static final String BASE_URL = "http://api.wunderground.com/api/%s/conditions/forecast/astronomy/hourly/q/%s/%s.json";
 
     private static final String API_KEY = "XXXX_WUNDERGROUND_API_KEY_XXXX";
     private static final String STATE_STRING = "CA";
@@ -136,6 +136,10 @@ public class WeatherActivity extends AppCompatActivity {
                         text.append("\n");
                         text.append(forecast.pop);
                         text.append("% chance of precipitation\n");
+                        text.append("\n");
+                    }
+                    for (AllData.Hourly hourly : data.hourly_forecast) {
+                        text.append(hourly.condition);
                         text.append("\n");
                     }
                 }
