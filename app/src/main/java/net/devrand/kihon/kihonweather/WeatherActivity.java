@@ -1,5 +1,6 @@
 package net.devrand.kihon.kihonweather;
 
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -12,6 +13,10 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.BarGraphSeries;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -20,17 +25,21 @@ import net.devrand.kihon.kihonweather.data.AllData;
 import net.devrand.kihon.kihonweather.data.Forecast;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class WeatherActivity extends AppCompatActivity {
 
     TextView textView;
 
     private static final String TAG = "WeatherActivity";
-    private static final String BASE_URL = "http://api.wunderground.com/api/%s/conditions/forecast/astronomy/hourly/q/%s/%s.json";
+    private static final String BASE_URL = "http://api.wunderground.com/api/%s/conditions/forecast/astronomy/hourly10day/q/%s/%s.json";
 
     private static final String API_KEY = "XXXX_WUNDERGROUND_API_KEY_XXXX";
     private static final String STATE_STRING = "CA";
     private static final String CITY_STRING = "San_Francisco";
+
+    GraphView graph;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +57,7 @@ public class WeatherActivity extends AppCompatActivity {
                 new GetDataTask().execute(BASE_URL, API_KEY, STATE_STRING, CITY_STRING);
             }
         });
+        graph = (GraphView) findViewById(R.id.graph);
     }
 
     @Override
@@ -138,10 +148,33 @@ public class WeatherActivity extends AppCompatActivity {
                         text.append("% chance of precipitation\n");
                         text.append("\n");
                     }
+                    int idx = 0;
+                    List<DataPoint> precipPoints = new ArrayList<>();
+                    List<DataPoint> tempPoints = new ArrayList<>();
+
                     for (AllData.Hourly hourly : data.hourly_forecast) {
                         text.append(hourly.condition);
                         text.append("\n");
+                        if (idx < 24 * 5) {
+                            precipPoints.add(new DataPoint(idx, hourly.pop));
+                            tempPoints.add(new DataPoint(idx, hourly.temp.english));
+                        }
+                        idx++;
                     }
+                    BarGraphSeries<DataPoint> barGraphSeries = new BarGraphSeries<DataPoint>(precipPoints.toArray(new DataPoint[precipPoints.size()]));
+                    graph.addSeries(barGraphSeries);
+
+                    LineGraphSeries<DataPoint> lineGraphSeries = new LineGraphSeries<DataPoint>(tempPoints.toArray(new DataPoint[tempPoints.size()]));
+                    lineGraphSeries.setColor(Color.CYAN);
+                    graph.addSeries(lineGraphSeries);
+                    graph.getViewport().setYAxisBoundsManual(true);
+                    graph.getViewport().setMaxY(100);
+                    graph.getViewport().setMinY(0);
+
+                    //graph.getViewport().setScrollable(true);
+                    graph.getViewport().setXAxisBoundsManual(true);
+                    graph.getViewport().setMinX(0);
+                    graph.getViewport().setMaxX(precipPoints.size());
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();

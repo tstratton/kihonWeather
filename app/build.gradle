@@ -26,4 +26,5 @@ dependencies {
     compile 'com.android.support:design:23.1.1'
     compile 'com.squareup.okhttp:okhttp:2.6.0'
     compile 'com.google.code.gson:gson:2.2.+'
+    compile 'com.jjoe64:graphview:4.0.1'
 }
