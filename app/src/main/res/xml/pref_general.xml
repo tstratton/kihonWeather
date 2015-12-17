@@ -1,0 +1,28 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <EditTextPreference
+        android:capitalize="words"
+        android:defaultValue="@string/pref_default_api_key"
+        android:inputType="textNoSuggestions"
+        android:key="@string/pref_key_api_key"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/pref_title_api_key" />
+
+    <EditTextPreference
+        android:capitalize="words"
+        android:defaultValue="@string/pref_default_zip_code"
+        android:inputType="number"
+        android:key="@string/pref_key_zip_code"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/pref_title_zip_code" />
+
+    <!-- This preference simply launches an intent when selected. Use this UI sparingly, per
+     design guidelines. -->
+    <Preference android:title="@string/pref_title_import_export">
+        <intent android:action="android.settings.SYNC_SETTINGS" />
+    </Preference>
+</PreferenceScreen>
