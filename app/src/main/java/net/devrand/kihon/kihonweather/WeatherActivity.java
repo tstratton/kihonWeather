@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.facebook.stetho.okhttp.StethoInterceptor;
 import com.google.gson.Gson;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.BarGraphSeries;
@@ -85,6 +86,7 @@ public class WeatherActivity extends AppCompatActivity {
     private class GetDataTask extends AsyncTask<String, Integer, AllData> {
         protected AllData doInBackground(String... urls) {
             OkHttpClient client = new OkHttpClient();
+            client.networkInterceptors().add(new StethoInterceptor());
             Response response;
 
             String url = String.format(urls[0], urls[1], urls[2], urls[3]);
