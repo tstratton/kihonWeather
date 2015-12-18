@@ -1,9 +1,11 @@
 package net.devrand.kihon.kihonweather;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -35,11 +37,7 @@ public class WeatherActivity extends AppCompatActivity {
     TextView textView;
 
     private static final String TAG = "WeatherActivity";
-    private static final String BASE_URL = "http://api.wunderground.com/api/%s/conditions/forecast/astronomy/hourly10day/q/%s/%s.json";
-
-    private static final String API_KEY = "XXXX_WUNDERGROUND_API_KEY_XXXX";
-    private static final String STATE_STRING = "CA";
-    private static final String CITY_STRING = "San_Francisco";
+    private static final String BASE_URL = "http://api.wunderground.com/api/%s/conditions/forecast/astronomy/hourly10day/q/%s.json";
 
     GraphView graph;
 
@@ -56,7 +54,9 @@ public class WeatherActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new GetDataTask().execute(BASE_URL, API_KEY, STATE_STRING, CITY_STRING);
+                SharedPreferences pref = PreferenceManager
+                        .getDefaultSharedPreferences(getBaseContext());
+                new GetDataTask().execute(BASE_URL, pref.getString(getString(R.string.pref_key_api_key), ""), pref.getString(getString(R.string.pref_key_zip_code), ""));
             }
         });
         graph = (GraphView) findViewById(R.id.graph);
@@ -91,7 +91,7 @@ public class WeatherActivity extends AppCompatActivity {
             client.networkInterceptors().add(new StethoInterceptor());
             Response response;
 
-            String url = String.format(urls[0], urls[1], urls[2], urls[3]);
+            String url = String.format(urls[0], urls[1], urls[2]);
 
             Log.d(TAG, "Getting " + url);
 
@@ -190,7 +190,9 @@ public class WeatherActivity extends AppCompatActivity {
 
             text.append("\n----- ----- ----- -----\n");
             text.append("API key '");
-            text.append(API_KEY);
+            SharedPreferences pref = PreferenceManager
+                    .getDefaultSharedPreferences(getBaseContext());
+            text.append(pref.getString(getString(R.string.pref_key_api_key), null));
             text.append("'\n");
             text.append(BASE_URL);
             text.append("\n");
