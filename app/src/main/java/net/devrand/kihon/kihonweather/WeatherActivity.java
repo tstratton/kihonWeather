@@ -56,7 +56,9 @@ public class WeatherActivity extends AppCompatActivity {
             public void onClick(View view) {
                 SharedPreferences pref = PreferenceManager
                         .getDefaultSharedPreferences(getBaseContext());
-                new GetDataTask().execute(BASE_URL, pref.getString(getString(R.string.pref_key_api_key), ""), pref.getString(getString(R.string.pref_key_zip_code), ""));
+                new GetDataTask().execute(BASE_URL,
+                        pref.getString(getString(R.string.pref_key_api_key), getString(R.string.pref_default_api_key)),
+                        pref.getString(getString(R.string.pref_key_zip_code), getString(R.string.pref_default_zip_code)));
             }
         });
         graph = (GraphView) findViewById(R.id.graph);
@@ -119,6 +121,7 @@ public class WeatherActivity extends AppCompatActivity {
 
         protected void onPreExecute() {
             textView.setText("Getting Data..");
+            graph.removeAllSeries();
         }
 
         protected void onPostExecute(AllData data) {
@@ -157,14 +160,13 @@ public class WeatherActivity extends AppCompatActivity {
                     List<DataPoint> tempPoints = new ArrayList<>();
 
                     for (AllData.Hourly hourly : data.hourly_forecast) {
-                        text.append(hourly.condition);
-                        text.append("\n");
                         if (idx < 24 * 5) {
                             precipPoints.add(new DataPoint(idx, hourly.pop));
                             tempPoints.add(new DataPoint(idx, hourly.temp.english));
                         }
                         idx++;
                     }
+
                     BarGraphSeries<DataPoint> barGraphSeries = new BarGraphSeries<DataPoint>(precipPoints.toArray(new DataPoint[precipPoints.size()]));
                     graph.addSeries(barGraphSeries);
 
@@ -192,7 +194,7 @@ public class WeatherActivity extends AppCompatActivity {
             text.append("API key '");
             SharedPreferences pref = PreferenceManager
                     .getDefaultSharedPreferences(getBaseContext());
-            text.append(pref.getString(getString(R.string.pref_key_api_key), null));
+            text.append(pref.getString(getString(R.string.pref_key_api_key), getString(R.string.pref_default_api_key)));
             text.append("'\n");
             text.append(BASE_URL);
             text.append("\n");
