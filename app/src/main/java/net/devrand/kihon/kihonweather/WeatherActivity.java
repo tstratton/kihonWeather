@@ -32,25 +32,39 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WeatherActivity extends AppCompatActivity {
+import butterknife.Bind;
+import butterknife.ButterKnife;
 
-    TextView textView;
+public class WeatherActivity extends AppCompatActivity {
 
     private static final String TAG = "WeatherActivity";
     private static final String BASE_URL = "http://api.wunderground.com/api/%s/conditions/forecast/astronomy/hourly10day/q/%s.json";
 
-    GraphView graph;
+    @Bind(R.id.text) TextView textView;
+    @Bind(R.id.graph) GraphView graph;
+
+    @Bind(R.id.location_text) TextView text_location;
+    @Bind(R.id.status_text) TextView text_status;
+    @Bind(R.id.sunrise_text) TextView text_sunrise;
+    @Bind(R.id.sunset_text) TextView text_sunset;
+    @Bind(R.id.temperture_text) TextView text_temperture;
+
+    @Bind(R.id.graphscroll) View graph_panel;
+    @Bind(R.id.current_card) View current_panel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_weather);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        ButterKnife.bind(this);
+
+        graph_panel.setVisibility(View.GONE);
+        current_panel.setVisibility(View.GONE);
+
+        Toolbar toolbar = ButterKnife.findById(this, R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        textView = (TextView) findViewById(R.id.text);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = ButterKnife.findById(this, R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -61,7 +75,6 @@ public class WeatherActivity extends AppCompatActivity {
                         pref.getString(getString(R.string.pref_key_zip_code), getString(R.string.pref_default_zip_code)));
             }
         });
-        graph = (GraphView) findViewById(R.id.graph);
     }
 
     @Override
@@ -122,6 +135,8 @@ public class WeatherActivity extends AppCompatActivity {
         protected void onPreExecute() {
             textView.setText("Getting Data..");
             graph.removeAllSeries();
+            graph_panel.setVisibility(View.GONE);
+            current_panel.setVisibility(View.GONE);
         }
 
         protected void onPostExecute(AllData data) {
@@ -134,18 +149,14 @@ public class WeatherActivity extends AppCompatActivity {
                     text.append(data.getError().description);
                     text.append("\n");
                 } else {
-                    text.append(data.current_observation.display_location.full);
-                    text.append("\n");
-                    text.append(data.current_observation.temperature_string);
-                    text.append("\n");
-                    text.append(data.current_observation.weather);
-                    text.append("\nSunrise ");
-                    text.append(data.sun_phase.getSunrise());
-                    text.append("\nSunset ");
-                    text.append(data.sun_phase.getSunset());
-                    text.append("\n");
+                    text_location.setText(data.current_observation.display_location.full);
+                    text_temperture.setText(data.current_observation.temperature_string);
+                    text_status.setText(data.current_observation.weather);
+                    text_sunrise.setText("Sunrise: " + data.sun_phase.getSunrise());
+                    text_sunset.setText("Sunset: " + data.sun_phase.getSunset());
+                    current_panel.setVisibility(View.VISIBLE);
 
-                    text.append("\nForecast:\n");
+                    text.append("Forecast:\n\n");
                     for (Forecast.TextForecastDay forecast : data.forecast.txt_forecast.forecastday) {
                         text.append(forecast.title);
                         text.append("\n");
@@ -181,6 +192,8 @@ public class WeatherActivity extends AppCompatActivity {
                     graph.getViewport().setXAxisBoundsManual(true);
                     graph.getViewport().setMinX(0);
                     graph.getViewport().setMaxX(precipPoints.size());
+
+                    graph_panel.setVisibility(View.VISIBLE);
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
