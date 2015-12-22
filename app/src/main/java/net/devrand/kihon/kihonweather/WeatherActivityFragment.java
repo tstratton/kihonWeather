@@ -141,6 +141,7 @@ public class WeatherActivityFragment extends Fragment {
         protected void onPreExecute() {
             textView.setText("Getting Data..");
             graph.removeAllSeries();
+            graph.getSecondScale().getSeries().clear();
             graph_panel.setVisibility(View.GONE);
             current_panel.setVisibility(View.GONE);
         }
@@ -189,8 +190,8 @@ public class WeatherActivityFragment extends Fragment {
                         idx++;
                     }
                     //System.out.format("Before: Min %03.2f Max %03.2f\n", minTemp, maxTemp);
-                    minTemp = (Math.round(minTemp) / 5) * 5 - 5;
-                    maxTemp = (Math.round(maxTemp) / 5) * 5 + 5;
+                    minTemp = (Math.round(minTemp) - 1);
+                    maxTemp = (Math.round(maxTemp) + 1);
                     //System.out.format("After: Min %03.2f Max %03.2f\n", minTemp, maxTemp);
 
                     BarGraphSeries<DataPoint> barGraphSeries = new BarGraphSeries<DataPoint>(precipPoints.toArray(new DataPoint[precipPoints.size()]));
