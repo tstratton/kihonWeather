@@ -30,6 +30,7 @@ public class AllData {
     }
 
     public class Hourly {
+        public FctTime FCTTIME;
         public int pop;
         public Measure temp;
         public String condition;

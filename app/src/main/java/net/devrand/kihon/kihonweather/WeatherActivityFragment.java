@@ -5,7 +5,6 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,6 +14,7 @@ import android.widget.TextView;
 
 import com.facebook.stetho.okhttp.StethoInterceptor;
 import com.google.gson.Gson;
+import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.BarGraphSeries;
 import com.jjoe64.graphview.series.DataPoint;
@@ -28,8 +28,12 @@ import net.devrand.kihon.kihonweather.data.Forecast;
 import net.devrand.kihon.kihonweather.event.FabEvent;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -48,14 +52,21 @@ public class WeatherActivityFragment extends Fragment {
     @Bind(R.id.graph)
     GraphView graph;
 
-    @Bind(R.id.location_text) TextView text_location;
-    @Bind(R.id.status_text) TextView text_status;
-    @Bind(R.id.sunrise_text) TextView text_sunrise;
-    @Bind(R.id.sunset_text) TextView text_sunset;
-    @Bind(R.id.temperture_text) TextView text_temperture;
+    @Bind(R.id.location_text)
+    TextView text_location;
+    @Bind(R.id.status_text)
+    TextView text_status;
+    @Bind(R.id.sunrise_text)
+    TextView text_sunrise;
+    @Bind(R.id.sunset_text)
+    TextView text_sunset;
+    @Bind(R.id.temperture_text)
+    TextView text_temperture;
 
-    @Bind(R.id.graphscroll) View graph_panel;
-    @Bind(R.id.current_card) View current_panel;
+    @Bind(R.id.graphscroll)
+    View graph_panel;
+    @Bind(R.id.current_card)
+    View current_panel;
 
     public WeatherActivityFragment() {
     }
@@ -92,6 +103,10 @@ public class WeatherActivityFragment extends Fragment {
     }
 
     private class GetDataTask extends AsyncTask<String, Integer, AllData> {
+        float maxTemp = -100;
+        float minTemp = 200;
+        long startTime = -1;
+
         protected AllData doInBackground(String... urls) {
             OkHttpClient client = new OkHttpClient();
             client.networkInterceptors().add(new StethoInterceptor());
@@ -162,27 +177,65 @@ public class WeatherActivityFragment extends Fragment {
                     List<DataPoint> tempPoints = new ArrayList<>();
 
                     for (AllData.Hourly hourly : data.hourly_forecast) {
-                        if (idx < 24 * 5) {
+                        if (startTime == -1) {
+                            startTime = hourly.FCTTIME.epoch;
+                        }
+                        if (idx < 24 * 4) {
                             precipPoints.add(new DataPoint(idx, hourly.pop));
                             tempPoints.add(new DataPoint(idx, hourly.temp.english));
+                            maxTemp = hourly.temp.english > maxTemp ? hourly.temp.english : maxTemp;
+                            minTemp = hourly.temp.english < minTemp ? hourly.temp.english : minTemp;
                         }
                         idx++;
                     }
+                    //System.out.format("Before: Min %03.2f Max %03.2f\n", minTemp, maxTemp);
+                    minTemp = (Math.round(minTemp) / 5) * 5 - 5;
+                    maxTemp = (Math.round(maxTemp) / 5) * 5 + 5;
+                    //System.out.format("After: Min %03.2f Max %03.2f\n", minTemp, maxTemp);
 
                     BarGraphSeries<DataPoint> barGraphSeries = new BarGraphSeries<DataPoint>(precipPoints.toArray(new DataPoint[precipPoints.size()]));
                     graph.addSeries(barGraphSeries);
-
-                    LineGraphSeries<DataPoint> lineGraphSeries = new LineGraphSeries<DataPoint>(tempPoints.toArray(new DataPoint[tempPoints.size()]));
-                    lineGraphSeries.setColor(Color.CYAN);
-                    graph.addSeries(lineGraphSeries);
                     graph.getViewport().setYAxisBoundsManual(true);
                     graph.getViewport().setMaxY(100);
                     graph.getViewport().setMinY(0);
+
+                    LineGraphSeries<DataPoint> lineGraphSeries = new LineGraphSeries<DataPoint>(tempPoints.toArray(new DataPoint[tempPoints.size()]));
+                    lineGraphSeries.setColor(Color.CYAN);
+                    graph.getSecondScale().addSeries(lineGraphSeries);
+                    graph.getSecondScale().setMinY(minTemp);
+                    graph.getSecondScale().setMaxY(maxTemp);
 
                     //graph.getViewport().setScrollable(true);
                     graph.getViewport().setXAxisBoundsManual(true);
                     graph.getViewport().setMinX(0);
                     graph.getViewport().setMaxX(precipPoints.size());
+
+                    //hide Second Scale text
+                    graph.getGridLabelRenderer().setVerticalLabelsSecondScaleColor(Color.WHITE);
+
+                    // custom label formatter to show temp and time
+                    graph.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {
+                        final Date startDate = new Date(startTime * 1000);
+                        Calendar calendar = Calendar.getInstance();
+                        SimpleDateFormat sdf = new SimpleDateFormat("ha EEE", Locale.US);
+
+                        @Override
+                        public String formatLabel(double value, boolean isValueX) {
+                            if (isValueX) {
+                                // show date for x values
+                                int intValue = (int) value;
+                                calendar.setTime(startDate);
+                                //System.out.println("start: " + sdf.format(calendar.getTime()));
+                                calendar.add(Calendar.HOUR_OF_DAY, intValue);
+                                //System.out.println("offset: " + sdf.format(calendar.getTime()));
+                                return sdf.format(calendar.getTime());
+                            } else {
+                                // show temperature for y values
+                                double calcvalue = (value / 100) * (maxTemp - minTemp) + minTemp;
+                                return super.formatLabel(calcvalue, isValueX) + "\u00B0 C ";
+                            }
+                        }
+                    });
 
                     graph_panel.setVisibility(View.VISIBLE);
                 }
@@ -206,7 +259,7 @@ public class WeatherActivityFragment extends Fragment {
     }
 
     // This method will be called when a MessageEvent is posted
-    public void onEvent(FabEvent event){
+    public void onEvent(FabEvent event) {
         SharedPreferences pref = PreferenceManager
                 .getDefaultSharedPreferences(getContext());
         new GetDataTask().execute(BASE_URL,
