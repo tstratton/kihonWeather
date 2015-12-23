@@ -142,6 +142,7 @@ public class WeatherActivityFragment extends Fragment {
             textView.setText("Getting Data..");
             graph.removeAllSeries();
             graph.getSecondScale().getSeries().clear();
+            graph_panel.scrollTo(0, 0);
             graph_panel.setVisibility(View.GONE);
             current_panel.setVisibility(View.GONE);
         }
