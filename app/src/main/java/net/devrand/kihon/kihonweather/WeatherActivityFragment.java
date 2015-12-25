@@ -6,6 +6,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,7 +26,6 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
 import net.devrand.kihon.kihonweather.data.AllData;
-import net.devrand.kihon.kihonweather.data.Forecast;
 import net.devrand.kihon.kihonweather.event.FabEvent;
 
 import java.io.IOException;
@@ -52,21 +53,11 @@ public class WeatherActivityFragment extends Fragment {
     @Bind(R.id.graph)
     GraphView graph;
 
-    @Bind(R.id.location_text)
-    TextView text_location;
-    @Bind(R.id.status_text)
-    TextView text_status;
-    @Bind(R.id.sunrise_text)
-    TextView text_sunrise;
-    @Bind(R.id.sunset_text)
-    TextView text_sunset;
-    @Bind(R.id.temperture_text)
-    TextView text_temperture;
-
     @Bind(R.id.graphscroll)
     View graph_panel;
-    @Bind(R.id.current_card)
-    View current_panel;
+
+    @Bind(R.id.forecastList)
+    RecyclerView forecastList;
 
     public WeatherActivityFragment() {
     }
@@ -78,8 +69,10 @@ public class WeatherActivityFragment extends Fragment {
         ButterKnife.bind(this, root);
 
         graph_panel.setVisibility(View.GONE);
-        current_panel.setVisibility(View.GONE);
+        forecastList.setVisibility(View.GONE);
 
+        forecastList.setLayoutManager(new LinearLayoutManager(getContext()));
+        forecastList.setAdapter(new ForecastAdapter());
         return root;
     }
 
@@ -144,7 +137,7 @@ public class WeatherActivityFragment extends Fragment {
             graph.getSecondScale().getSeries().clear();
             graph_panel.scrollTo(0, 0);
             graph_panel.setVisibility(View.GONE);
-            current_panel.setVisibility(View.GONE);
+            forecastList.setVisibility(View.GONE);
         }
 
         protected void onPostExecute(AllData data) {
@@ -157,23 +150,9 @@ public class WeatherActivityFragment extends Fragment {
                     text.append(data.getError().description);
                     text.append("\n");
                 } else {
-                    text_location.setText(data.current_observation.display_location.full);
-                    text_temperture.setText(data.current_observation.temperature_string);
-                    text_status.setText(data.current_observation.weather);
-                    text_sunrise.setText("Sunrise: " + data.sun_phase.getSunrise());
-                    text_sunset.setText("Sunset: " + data.sun_phase.getSunset());
-                    current_panel.setVisibility(View.VISIBLE);
+                    ((ForecastAdapter) forecastList.getAdapter()).addData(data);
+                    forecastList.setVisibility(View.VISIBLE);
 
-                    text.append("Forecast:\n\n");
-                    for (Forecast.TextForecastDay forecast : data.forecast.txt_forecast.forecastday) {
-                        text.append(forecast.title);
-                        text.append("\n");
-                        text.append(forecast.fcttext);
-                        text.append("\n");
-                        text.append(forecast.pop);
-                        text.append("% chance of precipitation\n");
-                        text.append("\n");
-                    }
                     int idx = 0;
                     List<DataPoint> precipPoints = new ArrayList<>();
                     List<DataPoint> tempPoints = new ArrayList<>();
@@ -248,14 +227,10 @@ public class WeatherActivityFragment extends Fragment {
                 text.append(ex.toString());
                 text.append("\n");
             }
-
-            text.append("\n----- ----- ----- -----\n");
             text.append("API key '");
             SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getContext());
             text.append(pref.getString(getString(R.string.pref_key_api_key), getString(R.string.pref_default_api_key)));
-            text.append("'\n");
-            text.append(BASE_URL);
-            text.append("\n");
+            text.append("'");
             textView.setText(text);
         }
     }
