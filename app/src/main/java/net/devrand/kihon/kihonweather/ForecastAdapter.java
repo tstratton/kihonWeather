@@ -1,13 +1,28 @@
 package net.devrand.kihon.kihonweather;
 
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.HorizontalScrollView;
 import android.widget.TextView;
+
+import com.jjoe64.graphview.DefaultLabelFormatter;
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.BarGraphSeries;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
 
 import net.devrand.kihon.kihonweather.data.AllData;
 import net.devrand.kihon.kihonweather.data.Forecast;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 import butterknife.ButterKnife;
 
@@ -22,7 +37,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public static final int TYPE_GRAPH = 2;
     public static final int TYPE_FORECAST = 3;
 
-    public static final int FORECAST_FIRST_INDEX = 1;
+    public static final int FORECAST_FIRST_INDEX = 2;
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -31,6 +46,8 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 return new ForecastHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.forecast_item, parent, false));
             case TYPE_CURRENT_CONDITIONS:
                 return new CurrentWeatherHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.current_weather_item, parent, false));
+            case TYPE_GRAPH:
+                return new GraphHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.graph_item, parent, false));
         }
         return null;
     }
@@ -46,7 +63,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     @Override
     public int getItemCount() {
         if (hasForecastData()) {
-            return 1 + data.forecast.txt_forecast.forecastday.size();//FIXME 2 + data.forecast.txt_forecast.forecastday.size();
+            return 2 + data.forecast.txt_forecast.forecastday.size();
         } else {
             return 2;
         }
@@ -56,14 +73,13 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public int getItemViewType(int position) {
         if (position >= FORECAST_FIRST_INDEX) {
             return TYPE_FORECAST;
-        }
-        if (position == 0) {
+        } else if (position == 0) {
             return TYPE_CURRENT_CONDITIONS;
-        }
-        if (position == 1) {
+        } else if (position == 1) {
             return TYPE_GRAPH;
+        } else {
+            return TYPE_UNKNOWN;
         }
-        return TYPE_UNKNOWN;
     }
 
     @Override
@@ -74,6 +90,9 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         if (position == 0) {
             ((CurrentWeatherHolder) holder).setup(data);
         }
+        if (position == 1) {
+            ((GraphHolder) holder).setup(data);
+        }
     }
 
     public void addData(AllData data) {
@@ -81,13 +100,100 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         notifyDataSetChanged();
     }
 
-    public class CurrentWeatherHolder extends RecyclerView.ViewHolder {
+    static class GraphHolder extends RecyclerView.ViewHolder {
+        GraphView graph;
+        HorizontalScrollView graph_panel;
+
+        float maxTemp = -100;
+        float minTemp = 200;
+        long startTime = -1;
+
+        GraphHolder(View row) {
+            super(row);
+            graph = ButterKnife.findById(row, R.id.graph);
+            graph_panel = ButterKnife.findById(row, R.id.graphscroll);
+        }
+
+        void setup(AllData data) {
+            int idx = 0;
+            List<DataPoint> precipPoints = new ArrayList<>();
+            List<DataPoint> tempPoints = new ArrayList<>();
+
+            graph.removeAllSeries();
+            graph.getSecondScale().getSeries().clear();
+            graph_panel.scrollTo(0, 0);
+
+            for (AllData.Hourly hourly : data.hourly_forecast) {
+                if (startTime == -1) {
+                    startTime = hourly.FCTTIME.epoch;
+                }
+                if (idx < 24 * 4) {
+                    precipPoints.add(new DataPoint(idx, hourly.pop));
+                    tempPoints.add(new DataPoint(idx, hourly.temp.english));
+                    maxTemp = hourly.temp.english > maxTemp ? hourly.temp.english : maxTemp;
+                    minTemp = hourly.temp.english < minTemp ? hourly.temp.english : minTemp;
+                }
+                idx++;
+            }
+            //System.out.format("Before: Min %03.2f Max %03.2f\n", minTemp, maxTemp);
+            minTemp = (Math.round(minTemp) - 1);
+            maxTemp = (Math.round(maxTemp) + 1);
+            //System.out.format("After: Min %03.2f Max %03.2f\n", minTemp, maxTemp);
+
+            BarGraphSeries<DataPoint> barGraphSeries = new BarGraphSeries<DataPoint>(precipPoints.toArray(new DataPoint[precipPoints.size()]));
+            graph.addSeries(barGraphSeries);
+            graph.getViewport().setYAxisBoundsManual(true);
+            graph.getViewport().setMaxY(100);
+            graph.getViewport().setMinY(0);
+
+            LineGraphSeries<DataPoint> lineGraphSeries = new LineGraphSeries<DataPoint>(tempPoints.toArray(new DataPoint[tempPoints.size()]));
+            lineGraphSeries.setColor(Color.CYAN);
+            graph.getSecondScale().addSeries(lineGraphSeries);
+            graph.getSecondScale().setMinY(minTemp);
+            graph.getSecondScale().setMaxY(maxTemp);
+
+            //graph.getViewport().setScrollable(true);
+            graph.getViewport().setXAxisBoundsManual(true);
+            graph.getViewport().setMinX(0);
+            graph.getViewport().setMaxX(precipPoints.size());
+
+            //hide Second Scale text
+            graph.getGridLabelRenderer().setVerticalLabelsSecondScaleColor(Color.WHITE);
+
+            // custom label formatter to show temp and time
+            graph.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {
+                final Date startDate = new Date(startTime * 1000);
+                Calendar calendar = Calendar.getInstance();
+                SimpleDateFormat sdf = new SimpleDateFormat("ha EEE", Locale.US);
+
+                @Override
+                public String formatLabel(double value, boolean isValueX) {
+                    if (isValueX) {
+                        // show date for x values
+                        int intValue = (int) value;
+                        calendar.setTime(startDate);
+                        //System.out.println("start: " + sdf.format(calendar.getTime()));
+                        calendar.add(Calendar.HOUR_OF_DAY, intValue);
+                        //System.out.println("offset: " + sdf.format(calendar.getTime()));
+                        return sdf.format(calendar.getTime());
+                    } else {
+                        // show temperature for y values
+                        double calcvalue = (value / 100) * (maxTemp - minTemp) + minTemp;
+                        return super.formatLabel(calcvalue, isValueX) + "\u00B0 C ";
+                    }
+                }
+            });
+
+        }
+    }
+
+    static class CurrentWeatherHolder extends RecyclerView.ViewHolder {
 
         TextView text_location;
         TextView text_status;
         TextView text_sunrise;
         TextView text_sunset;
-        TextView text_temperture;
+        TextView text_temperature;
 
         CurrentWeatherHolder(View row) {
             super(row);
@@ -95,19 +201,19 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             text_status = ButterKnife.findById(row, R.id.status_text);
             text_sunrise = ButterKnife.findById(row, R.id.sunrise_text);
             text_sunset = ButterKnife.findById(row, R.id.sunset_text);
-            text_temperture = ButterKnife.findById(row, R.id.temperture_text);
+            text_temperature = ButterKnife.findById(row, R.id.temperature_text);
         }
 
         void setup(AllData data) {
             text_location.setText(data.current_observation.display_location.full);
-            text_temperture.setText(data.current_observation.temperature_string);
+            text_temperature.setText(data.current_observation.temperature_string);
             text_status.setText(data.current_observation.weather);
             text_sunrise.setText("Sunrise: " + data.sun_phase.getSunrise());
             text_sunset.setText("Sunset: " + data.sun_phase.getSunset());
         }
     }
 
-    public class ForecastHolder extends RecyclerView.ViewHolder {
+    static class ForecastHolder extends RecyclerView.ViewHolder {
         TextView title;
         TextView description;
 

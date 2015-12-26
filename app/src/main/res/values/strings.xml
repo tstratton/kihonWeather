@@ -3,7 +3,7 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_settings">Settings</string>
 
-    <string name="welcome_text">Welcome to Kihon Weather.\n\nTouch the Floating Action Button (FAB) to get/refresh the weather.</string>
+    <string name="welcome_text">Welcome to Kihon Weather.\n\nTouch the Floating Action Button (FAB) to get / refresh the weather.</string>
 
     <!-- Strings related to Settings -->
 
