@@ -10,6 +10,7 @@ public class AllData {
     public Astronomy moon_phase;
     public Astronomy sun_phase;
     public Hourly hourly_forecast[];
+    public Location location;
 
     public boolean hasError() {
         return response == null || response.error != null;

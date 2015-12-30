@@ -16,6 +16,7 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 
 import net.devrand.kihon.kihonweather.data.AllData;
 import net.devrand.kihon.kihonweather.data.Forecast;
+import net.devrand.kihon.kihonweather.data.WeatherStation;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -36,8 +37,11 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public static final int TYPE_CURRENT_CONDITIONS = 1;
     public static final int TYPE_GRAPH = 2;
     public static final int TYPE_FORECAST = 3;
+    public static final int TYPE_STATION = 4;
 
     public static final int FORECAST_FIRST_INDEX = 2;
+
+    public static int stationFirstIndex = 100;
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -48,6 +52,8 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 return new CurrentWeatherHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.current_weather_item, parent, false));
             case TYPE_GRAPH:
                 return new GraphHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.graph_item, parent, false));
+            case TYPE_STATION:
+                return new StationHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.graph_item, parent, false));
         }
         return null;
     }
@@ -226,6 +232,22 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         void setup(Forecast.TextForecastDay data) {
             title.setText(data.title);
             description.setText(data.fcttext);
+        }
+    }
+
+    static class StationHolder extends RecyclerView.ViewHolder {
+        TextView title;
+        TextView description;
+
+        StationHolder(View row) {
+            super(row);
+            title = ButterKnife.findById(row, R.id.forecast_title);
+            description = ButterKnife.findById(row, R.id.forecast_description);
+        }
+
+        void setup(WeatherStation data) {
+            title.setText(data.city + ", " + data.state);
+            description.setText(data.icao == null ? data.neighborhood : data.icao);
         }
     }
 }

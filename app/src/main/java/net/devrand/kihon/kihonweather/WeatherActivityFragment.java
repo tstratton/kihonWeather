@@ -34,7 +34,7 @@ import de.greenrobot.event.EventBus;
 public class WeatherActivityFragment extends Fragment {
 
     private static final String TAG = "WeatherActivity";
-    private static final String BASE_URL = "http://api.wunderground.com/api/%s/conditions/forecast/astronomy/hourly10day/q/%s.json";
+    private static final String BASE_URL = "http://api.wunderground.com/api/%s/conditions/geolookup/forecast/astronomy/hourly10day/q/%s.json";
 
     @Bind(R.id.text)
     TextView textView;
