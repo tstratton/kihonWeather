@@ -15,8 +15,8 @@ public class Location {
     public NearbyStations nearby_weather_stations;
 
     public class NearbyStations {
-        StationList airport;
-        StationList pws;
+        public StationList airport;
+        public StationList pws;
     }
 
     public class StationList {
