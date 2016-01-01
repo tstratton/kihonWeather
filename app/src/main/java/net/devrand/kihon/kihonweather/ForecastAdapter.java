@@ -53,8 +53,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             case TYPE_GRAPH:
                 return new GraphHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.graph_item, parent, false));
             case TYPE_STATION:
-                return new StationHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.graph_item, parent, false));
-        }
+                return new StationHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.forecast_item, parent, false));        }
         return null;
     }
 
@@ -66,18 +65,50 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         return true;
     }
 
+    public boolean nullOrEmpty(List list) {
+        if (list == null) {
+            return true;
+        }
+        return list.isEmpty();
+    }
+
+    public boolean hasStationData() {
+        return stationDataCount() > 0;
+    }
+
+    public int forecastDataCount () {
+        if (hasForecastData()) {
+            return data.forecast.txt_forecast.forecastday.size();
+        }
+        return 0;
+    }
+
+    public int stationDataCount () {
+        int count = 0;
+        if (data == null || data.location == null || data.location.nearby_weather_stations == null) {
+            return count;
+        }
+        if (data.location.nearby_weather_stations.airport != null &&
+                !nullOrEmpty(data.location.nearby_weather_stations.airport.station)) {
+            count = count + data.location.nearby_weather_stations.airport.station.size();
+        }
+        if (data.location.nearby_weather_stations.pws != null &&
+                !nullOrEmpty(data.location.nearby_weather_stations.pws.station)) {
+            count = count + data.location.nearby_weather_stations.pws.station.size();
+        }
+        return count;
+    }
+
     @Override
     public int getItemCount() {
-        if (hasForecastData()) {
-            return 2 + data.forecast.txt_forecast.forecastday.size();
-        } else {
-            return 2;
-        }
+        return 2 + forecastDataCount() + stationDataCount();
     }
 
     @Override
     public int getItemViewType(int position) {
-        if (position >= FORECAST_FIRST_INDEX) {
+        if (position >= stationFirstIndex) {
+            return TYPE_STATION;
+        } else if (position >= FORECAST_FIRST_INDEX) {
             return TYPE_FORECAST;
         } else if (position == 0) {
             return TYPE_CURRENT_CONDITIONS;
@@ -90,19 +121,33 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        if (position >= FORECAST_FIRST_INDEX) {
+        if (position >= stationFirstIndex) {
+            int index = position - FORECAST_FIRST_INDEX - forecastDataCount();
+            if ((data.location.nearby_weather_stations.airport != null) &&
+                    !nullOrEmpty(data.location.nearby_weather_stations.airport.station)) {
+                if (index < data.location.nearby_weather_stations.airport.station.size()) {
+                    ((StationHolder) holder).setup(data.location.nearby_weather_stations.airport.station.get(index));
+                    return;
+                } else {
+                    index -= data.location.nearby_weather_stations.airport.station.size();
+                }
+                ((StationHolder) holder).setup(data.location.nearby_weather_stations.pws.station.get(index));
+            }
+        }
+        else if (position >= FORECAST_FIRST_INDEX) {
             ((ForecastHolder) holder).setup(data.forecast.txt_forecast.forecastday.get(position - FORECAST_FIRST_INDEX));
         }
-        if (position == 0) {
+        else if (position == 0) {
             ((CurrentWeatherHolder) holder).setup(data);
         }
-        if (position == 1) {
+        else if (position == 1) {
             ((GraphHolder) holder).setup(data);
         }
     }
 
     public void addData(AllData data) {
         this.data = data;
+        stationFirstIndex = 2 + forecastDataCount();
         notifyDataSetChanged();
     }
 
@@ -110,9 +155,8 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         GraphView graph;
         HorizontalScrollView graph_panel;
 
-        float maxTemp = -100;
-        float minTemp = 200;
-        long startTime = -1;
+        float maxTemp, minTemp;
+        long startTime;
 
         GraphHolder(View row) {
             super(row);
@@ -124,6 +168,10 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             int idx = 0;
             List<DataPoint> precipPoints = new ArrayList<>();
             List<DataPoint> tempPoints = new ArrayList<>();
+
+            maxTemp = -100;
+            minTemp = 200;
+            startTime = -1;
 
             graph.removeAllSeries();
             graph.getSecondScale().getSeries().clear();
