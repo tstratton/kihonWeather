@@ -9,6 +9,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <ImageView
+            android:id="@+id/status_icon"
+            android:layout_width="@dimen/forecast_icon_size"
+            android:layout_height="@dimen/forecast_icon_size"
+            android:layout_centerInParent="true" />
+
         <TextView
             android:id="@+id/location_text"
             android:layout_width="match_parent"
@@ -21,9 +27,10 @@
             android:id="@+id/status_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
             android:layout_below="@id/location_text"
             android:layout_margin="@dimen/margin_medium"
+            android:layout_gravity="left"
+            android:layout_toLeftOf="@+id/status_icon"
             android:textSize="24sp"
             tools:text="Overcast" />
 
@@ -31,9 +38,9 @@
             android:id="@+id/temperature_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
             android:layout_below="@id/location_text"
             android:layout_margin="@dimen/margin_medium"
+            android:layout_toRightOf="@+id/status_icon"
             android:textSize="20sp"
             tools:text="44.1 F (6.7 C)" />
 

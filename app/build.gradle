@@ -34,5 +34,6 @@ dependencies {
     compile 'com.jakewharton:butterknife:7.0.1'
     compile 'com.jjoe64:graphview:4.0.1'
     compile 'com.squareup.okhttp:okhttp:2.6.0'
+    compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'de.greenrobot:eventbus:2.4.0'
 }

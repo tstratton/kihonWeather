@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.HorizontalScrollView;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.jjoe64.graphview.DefaultLabelFormatter;
@@ -13,6 +14,7 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.BarGraphSeries;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
+import com.squareup.picasso.Picasso;
 
 import net.devrand.kihon.kihonweather.data.AllData;
 import net.devrand.kihon.kihonweather.data.Forecast;
@@ -248,6 +250,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         TextView text_sunrise;
         TextView text_sunset;
         TextView text_temperature;
+        ImageView icon_status;
 
         CurrentWeatherHolder(View row) {
             super(row);
@@ -256,44 +259,56 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             text_sunrise = ButterKnife.findById(row, R.id.sunrise_text);
             text_sunset = ButterKnife.findById(row, R.id.sunset_text);
             text_temperature = ButterKnife.findById(row, R.id.temperature_text);
+            icon_status = ButterKnife.findById(row, R.id.status_icon);
         }
 
         void setup(AllData data) {
             text_location.setText(data.current_observation.display_location.full);
-            text_temperature.setText(data.current_observation.temperature_string);
+            String temp = data.current_observation.temperature_string;
+            temp = temp.replace(" (", "\n(");
+            text_temperature.setText(temp);
             text_status.setText(data.current_observation.weather);
             text_sunrise.setText("Sunrise: " + data.sun_phase.getSunrise());
             text_sunset.setText("Sunset: " + data.sun_phase.getSunset());
+
+            Picasso.with(icon_status.getContext()).load(data.current_observation.icon_url).into(icon_status);
         }
     }
 
     static class ForecastHolder extends RecyclerView.ViewHolder {
         TextView title;
         TextView description;
+        ImageView icon;
 
         ForecastHolder(View row) {
             super(row);
             title = ButterKnife.findById(row, R.id.forecast_title);
             description = ButterKnife.findById(row, R.id.forecast_description);
+            icon = ButterKnife.findById(row, R.id.forecast_icon);
         }
 
         void setup(Forecast.TextForecastDay data) {
             title.setText(data.title);
             description.setText(data.fcttext);
+
+            Picasso.with(icon.getContext()).load(data.icon_url).into(icon);
         }
     }
 
     static class StationHolder extends RecyclerView.ViewHolder {
         TextView title;
         TextView description;
+        ImageView icon;
 
         StationHolder(View row) {
             super(row);
             title = ButterKnife.findById(row, R.id.forecast_title);
             description = ButterKnife.findById(row, R.id.forecast_description);
+            icon = ButterKnife.findById(row, R.id.forecast_icon);
         }
 
         void setup(WeatherStation data) {
+            icon.setVisibility(View.GONE);
             title.setText(data.city + ", " + data.state);
             description.setText(data.icao == null ? data.neighborhood : data.icao);
         }

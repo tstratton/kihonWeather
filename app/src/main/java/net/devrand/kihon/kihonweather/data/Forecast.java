@@ -17,5 +17,6 @@ public class Forecast {
         public String title;
         public String fcttext;
         public String pop;
+        public String icon_url;
     }
 }
