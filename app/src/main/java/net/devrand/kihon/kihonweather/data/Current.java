@@ -8,7 +8,7 @@ public class Current {
 
     public String weather;
     public String temperature_string;
-    public String observation_epoch;
+    public long observation_epoch;
     public String icon_url;
 
     public class LocationInfo {

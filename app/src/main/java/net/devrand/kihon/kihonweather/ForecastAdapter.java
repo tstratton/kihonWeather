@@ -2,6 +2,7 @@ package net.devrand.kihon.kihonweather;
 
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -246,6 +247,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     static class CurrentWeatherHolder extends RecyclerView.ViewHolder {
 
         TextView text_location;
+        TextView text_time;
         TextView text_status;
         TextView text_sunrise;
         TextView text_sunset;
@@ -255,6 +257,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         CurrentWeatherHolder(View row) {
             super(row);
             text_location = ButterKnife.findById(row, R.id.location_text);
+            text_time = ButterKnife.findById(row, R.id.time_text);
             text_status = ButterKnife.findById(row, R.id.status_text);
             text_sunrise = ButterKnife.findById(row, R.id.sunrise_text);
             text_sunset = ButterKnife.findById(row, R.id.sunset_text);
@@ -270,6 +273,10 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             text_status.setText(data.current_observation.weather);
             text_sunrise.setText("Sunrise: " + data.sun_phase.getSunrise());
             text_sunset.setText("Sunset: " + data.sun_phase.getSunset());
+            long observation_time_ms = data.current_observation.observation_epoch * 1000;
+            CharSequence timeString = DateUtils.getRelativeDateTimeString(text_time.getContext(), observation_time_ms,
+                    DateUtils.MINUTE_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, DateUtils.FORMAT_ABBREV_ALL);
+            text_time.setText(timeString);
 
             Picasso.with(icon_status.getContext()).load(data.current_observation.icon_url).into(icon_status);
         }

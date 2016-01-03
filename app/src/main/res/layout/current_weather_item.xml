@@ -20,8 +20,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:gravity="center"
+            android:gravity="left"
             tools:text="New York, NY" />
+
+        <TextView
+            android:id="@+id/time_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:gravity="right"
+            tools:text="12:34 pm (x min ago)" />
 
         <TextView
             android:id="@+id/status_text"
