@@ -307,6 +307,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         TextView title;
         TextView description;
         ImageView icon;
+        String stationId;
 
         StationHolder(View row) {
             super(row);
@@ -316,12 +317,14 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
 
         void setup(WeatherStation data, String currentStationId) {
+            stationId = data.id == null ? data.icao : data.id;
             icon.setVisibility(View.GONE);
             title.setText(data.city + ", " + data.state);
             description.setText(data.icao == null ? data.neighborhood : data.icao);
-            boolean isCurrentStation = currentStationId.equalsIgnoreCase(data.id);
+            boolean isCurrentStation = currentStationId.equalsIgnoreCase(stationId);
             description.setTextColor(isCurrentStation ? Color.RED : Color.BLACK);
             title.setTextColor(isCurrentStation ? Color.RED : Color.BLACK);
+
         }
     }
 }
