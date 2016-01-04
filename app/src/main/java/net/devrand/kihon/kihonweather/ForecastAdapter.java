@@ -125,17 +125,18 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (position >= stationFirstIndex) {
+            String currentStation = data.current_observation.station_id;
             int index = position - FORECAST_FIRST_INDEX - forecastDataCount();
             if ((data.location.nearby_weather_stations.airport != null) &&
                     !nullOrEmpty(data.location.nearby_weather_stations.airport.station)) {
                 if (index < data.location.nearby_weather_stations.airport.station.size()) {
-                    ((StationHolder) holder).setup(data.location.nearby_weather_stations.airport.station.get(index));
+                    ((StationHolder) holder).setup(data.location.nearby_weather_stations.airport.station.get(index), currentStation);
                     return;
                 } else {
                     index -= data.location.nearby_weather_stations.airport.station.size();
                 }
-                ((StationHolder) holder).setup(data.location.nearby_weather_stations.pws.station.get(index));
             }
+            ((StationHolder) holder).setup(data.location.nearby_weather_stations.pws.station.get(index), currentStation);
         }
         else if (position >= FORECAST_FIRST_INDEX) {
             ((ForecastHolder) holder).setup(data.forecast.txt_forecast.forecastday.get(position - FORECAST_FIRST_INDEX));
@@ -314,10 +315,13 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             icon = ButterKnife.findById(row, R.id.forecast_icon);
         }
 
-        void setup(WeatherStation data) {
+        void setup(WeatherStation data, String currentStationId) {
             icon.setVisibility(View.GONE);
             title.setText(data.city + ", " + data.state);
             description.setText(data.icao == null ? data.neighborhood : data.icao);
+            boolean isCurrentStation = currentStationId.equalsIgnoreCase(data.id);
+            description.setTextColor(isCurrentStation ? Color.RED : Color.BLACK);
+            title.setTextColor(isCurrentStation ? Color.RED : Color.BLACK);
         }
     }
 }
