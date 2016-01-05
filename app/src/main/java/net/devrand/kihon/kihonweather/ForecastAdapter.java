@@ -20,6 +20,7 @@ import com.squareup.picasso.Picasso;
 import net.devrand.kihon.kihonweather.data.AllData;
 import net.devrand.kihon.kihonweather.data.Forecast;
 import net.devrand.kihon.kihonweather.data.WeatherStation;
+import net.devrand.kihon.kihonweather.event.StationClickEvent;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ import java.util.List;
 import java.util.Locale;
 
 import butterknife.ButterKnife;
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by tstratto on 12/24/2015.
@@ -303,11 +305,12 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
     }
 
-    static class StationHolder extends RecyclerView.ViewHolder {
+    static class StationHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView title;
         TextView description;
         ImageView icon;
         String stationId;
+        boolean isPwsStation;
 
         StationHolder(View row) {
             super(row);
@@ -317,14 +320,21 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
 
         void setup(WeatherStation data, String currentStationId) {
-            stationId = data.id == null ? data.icao : data.id;
+            isPwsStation = data.id != null;
+            stationId = isPwsStation ? data.id : data.icao;
             icon.setVisibility(View.GONE);
             title.setText(data.city + ", " + data.state);
-            description.setText(data.icao == null ? data.neighborhood : data.icao);
+            description.setText(isPwsStation ? data.neighborhood : data.icao);
             boolean isCurrentStation = currentStationId.equalsIgnoreCase(stationId);
             description.setTextColor(isCurrentStation ? Color.RED : Color.BLACK);
             title.setTextColor(isCurrentStation ? Color.RED : Color.BLACK);
 
+            this.itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+            EventBus.getDefault().post(new StationClickEvent(isPwsStation ? "pws:" + stationId : stationId));
         }
     }
 }

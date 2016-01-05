@@ -21,6 +21,7 @@ import com.squareup.okhttp.Response;
 
 import net.devrand.kihon.kihonweather.data.AllData;
 import net.devrand.kihon.kihonweather.event.FabEvent;
+import net.devrand.kihon.kihonweather.event.StationClickEvent;
 
 import java.io.IOException;
 
@@ -151,10 +152,20 @@ public class WeatherActivityFragment extends Fragment {
 
     // This method will be called when a MessageEvent is posted
     public void onEvent(FabEvent event) {
-        SharedPreferences pref = PreferenceManager
-                .getDefaultSharedPreferences(getContext());
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getContext());
         new GetDataTask().execute(BASE_URL,
                 pref.getString(getString(R.string.pref_key_api_key), getString(R.string.pref_default_api_key)),
                 pref.getString(getString(R.string.pref_key_zip_code), getString(R.string.pref_default_zip_code)));
+    }
+
+    public void onEvent(StationClickEvent event) {
+        if (event.stationId == null) {
+            return;
+        }
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getContext());
+        pref.edit()
+                .putString(getString(R.string.pref_key_zip_code), event.stationId)
+                .commit();
+        EventBus.getDefault().post(new FabEvent());
     }
 }
