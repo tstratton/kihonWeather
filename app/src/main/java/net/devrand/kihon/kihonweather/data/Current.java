@@ -9,6 +9,7 @@ public class Current {
     public String weather;
     public String temperature_string;
     public long observation_epoch;
+    public String icon;
     public String icon_url;
     public String station_id;
 

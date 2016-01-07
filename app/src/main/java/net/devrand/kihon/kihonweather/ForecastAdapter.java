@@ -281,7 +281,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     DateUtils.MINUTE_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, DateUtils.FORMAT_ABBREV_ALL);
             text_time.setText(timeString);
 
-            Picasso.with(icon_status.getContext()).load(data.current_observation.icon_url).into(icon_status);
+            Picasso.with(icon_status.getContext()).load(getAssetUrl(data.current_observation.icon)).into(icon_status);
         }
     }
 
@@ -301,7 +301,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             title.setText(data.title);
             description.setText(data.fcttext);
 
-            Picasso.with(icon.getContext()).load(data.icon_url).into(icon);
+            Picasso.with(icon.getContext()).load(getAssetUrl(data.icon)).into(icon);
         }
     }
 
@@ -336,5 +336,9 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         public void onClick(View view) {
             EventBus.getDefault().post(new StationClickEvent(isPwsStation ? "pws:" + stationId : stationId));
         }
+    }
+
+    public static String getAssetUrl(String iconName) {
+        return String.format("file:///android_asset/%s.gif", iconName);
     }
 }
