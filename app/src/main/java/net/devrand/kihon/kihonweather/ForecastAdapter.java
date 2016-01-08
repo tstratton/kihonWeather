@@ -42,11 +42,8 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public static final int TYPE_CURRENT_CONDITIONS = 1;
     public static final int TYPE_GRAPH = 2;
     public static final int TYPE_FORECAST = 3;
-    public static final int TYPE_STATION = 4;
 
     public static final int FORECAST_FIRST_INDEX = 2;
-
-    public static int stationFirstIndex = 100;
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -57,8 +54,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 return new CurrentWeatherHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.current_weather_item, parent, false));
             case TYPE_GRAPH:
                 return new GraphHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.graph_item, parent, false));
-            case TYPE_STATION:
-                return new StationHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.forecast_item, parent, false));        }
+        }
         return null;
     }
 
@@ -77,10 +73,6 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         return list.isEmpty();
     }
 
-    public boolean hasStationData() {
-        return stationDataCount() > 0;
-    }
-
     public int forecastDataCount () {
         if (hasForecastData()) {
             return data.forecast.txt_forecast.forecastday.size();
@@ -88,32 +80,14 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         return 0;
     }
 
-    public int stationDataCount () {
-        int count = 0;
-        if (data == null || data.location == null || data.location.nearby_weather_stations == null) {
-            return count;
-        }
-        if (data.location.nearby_weather_stations.airport != null &&
-                !nullOrEmpty(data.location.nearby_weather_stations.airport.station)) {
-            count = count + data.location.nearby_weather_stations.airport.station.size();
-        }
-        if (data.location.nearby_weather_stations.pws != null &&
-                !nullOrEmpty(data.location.nearby_weather_stations.pws.station)) {
-            count = count + data.location.nearby_weather_stations.pws.station.size();
-        }
-        return count;
-    }
-
     @Override
     public int getItemCount() {
-        return 2 + forecastDataCount() + stationDataCount();
+        return 2 + forecastDataCount();
     }
 
     @Override
     public int getItemViewType(int position) {
-        if (position >= stationFirstIndex) {
-            return TYPE_STATION;
-        } else if (position >= FORECAST_FIRST_INDEX) {
+        if (position >= FORECAST_FIRST_INDEX) {
             return TYPE_FORECAST;
         } else if (position == 0) {
             return TYPE_CURRENT_CONDITIONS;
@@ -126,21 +100,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        if (position >= stationFirstIndex) {
-            String currentStation = data.current_observation.station_id;
-            int index = position - FORECAST_FIRST_INDEX - forecastDataCount();
-            if ((data.location.nearby_weather_stations.airport != null) &&
-                    !nullOrEmpty(data.location.nearby_weather_stations.airport.station)) {
-                if (index < data.location.nearby_weather_stations.airport.station.size()) {
-                    ((StationHolder) holder).setup(data.location.nearby_weather_stations.airport.station.get(index), currentStation);
-                    return;
-                } else {
-                    index -= data.location.nearby_weather_stations.airport.station.size();
-                }
-            }
-            ((StationHolder) holder).setup(data.location.nearby_weather_stations.pws.station.get(index), currentStation);
-        }
-        else if (position >= FORECAST_FIRST_INDEX) {
+        if (position >= FORECAST_FIRST_INDEX) {
             ((ForecastHolder) holder).setup(data.forecast.txt_forecast.forecastday.get(position - FORECAST_FIRST_INDEX));
         }
         else if (position == 0) {
@@ -153,7 +113,6 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     public void addData(AllData data) {
         this.data = data;
-        stationFirstIndex = 2 + forecastDataCount();
         notifyDataSetChanged();
     }
 
@@ -302,39 +261,6 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             description.setText(data.fcttext);
 
             Picasso.with(icon.getContext()).load(getAssetUrl(data.icon)).into(icon);
-        }
-    }
-
-    static class StationHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        TextView title;
-        TextView description;
-        ImageView icon;
-        String stationId;
-        boolean isPwsStation;
-
-        StationHolder(View row) {
-            super(row);
-            title = ButterKnife.findById(row, R.id.forecast_title);
-            description = ButterKnife.findById(row, R.id.forecast_description);
-            icon = ButterKnife.findById(row, R.id.forecast_icon);
-        }
-
-        void setup(WeatherStation data, String currentStationId) {
-            isPwsStation = data.id != null;
-            stationId = isPwsStation ? data.id : data.icao;
-            icon.setVisibility(View.GONE);
-            title.setText(data.city + ", " + data.state);
-            description.setText(isPwsStation ? data.neighborhood : data.icao);
-            boolean isCurrentStation = currentStationId.equalsIgnoreCase(stationId);
-            description.setTextColor(isCurrentStation ? Color.RED : Color.BLACK);
-            title.setTextColor(isCurrentStation ? Color.RED : Color.BLACK);
-
-            this.itemView.setOnClickListener(this);
-        }
-
-        @Override
-        public void onClick(View view) {
-            EventBus.getDefault().post(new StationClickEvent(isPwsStation ? "pws:" + stationId : stationId));
         }
     }
 

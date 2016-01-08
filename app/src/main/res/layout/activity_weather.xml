@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     android:background="#888888"
+    android:fitsSystemWindows="true"
     tools:context="net.devrand.kihon.kihonweather.WeatherActivity">
 
     <android.support.design.widget.AppBarLayout
@@ -22,7 +22,10 @@
 
     </android.support.design.widget.AppBarLayout>
 
+    <!-- //FIXME manually switch between fragments for now
     <include layout="@layout/content_weather" />
+    -->
+    <include layout="@layout/content_station" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"

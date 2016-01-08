@@ -10,6 +10,9 @@ public class WeatherStation {
     public String icao;
     public String neighborhood;
     public String id;
-    public double lat;
-    public double lon;
+    //FIXME should be double, but some results give empty string ""
+    // and GSON throws an exception when it tries to parse
+    // (airport station KNTD has this error)
+    public String lat;
+    public String lon;
 }
