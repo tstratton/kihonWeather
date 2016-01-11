@@ -24,8 +24,13 @@
 
     <!-- //FIXME manually switch between fragments for now
     <include layout="@layout/content_weather" />
-    -->
     <include layout="@layout/content_station" />
+    -->
+    <FrameLayout
+        android:id="@+id/main_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
