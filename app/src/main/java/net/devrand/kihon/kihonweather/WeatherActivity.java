@@ -37,8 +37,8 @@ public class WeatherActivity extends AppCompatActivity {
 
         FrameLayout frame = ButterKnife.findById(this, R.id.main_fragment);
         Fragment fragment = new WeatherActivityFragment();
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.add(frame.getId(), fragment).commit();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.add(frame.getId(), fragment).commit();
     }
 
     @Override
@@ -55,9 +55,15 @@ public class WeatherActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        if (id == R.id.action_settings) {
-            startActivity(new Intent(this, SettingsActivity.class));
-            return true;
+        switch (id) {
+            case R.id.action_settings:
+                startActivity(new Intent(this, SettingsActivity.class));
+                return true;
+            case R.id.action_forecast:
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                return true;
+            case R.id.action_stations:
+                return true;
         }
 
         return super.onOptionsItemSelected(item);

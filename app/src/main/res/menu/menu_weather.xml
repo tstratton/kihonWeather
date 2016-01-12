@@ -7,4 +7,12 @@
         android:orderInCategory="100"
         android:title="@string/action_settings"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_forecast"
+        android:title="@string/action_forecast"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_stations"
+        android:title="@string/action_stations"
+        app:showAsAction="never" />
 </menu>
