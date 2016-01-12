@@ -19,6 +19,8 @@ import de.greenrobot.event.EventBus;
 
 public class WeatherActivity extends AppCompatActivity {
 
+    FrameLayout fragmentContainer;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,10 +37,10 @@ public class WeatherActivity extends AppCompatActivity {
             }
         });
 
-        FrameLayout frame = ButterKnife.findById(this, R.id.main_fragment);
+        fragmentContainer = ButterKnife.findById(this, R.id.main_fragment);
         Fragment fragment = new WeatherActivityFragment();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.add(frame.getId(), fragment).commit();
+        transaction.add(fragmentContainer.getId(), fragment).commit();
     }
 
     @Override
@@ -60,9 +62,14 @@ public class WeatherActivity extends AppCompatActivity {
                 startActivity(new Intent(this, SettingsActivity.class));
                 return true;
             case R.id.action_forecast:
-                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                getSupportFragmentManager().popBackStack();
                 return true;
             case R.id.action_stations:
+                Fragment fragment = new StationSelectionFragment();
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.replace(fragmentContainer.getId(), fragment)
+                        .addToBackStack(null)
+                        .commit();
                 return true;
         }
 
