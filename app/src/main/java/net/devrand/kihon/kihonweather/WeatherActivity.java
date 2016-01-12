@@ -51,6 +51,18 @@ public class WeatherActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        menu.clear();
+        getMenuInflater().inflate(R.menu.menu_weather, menu);
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+            menu.removeItem(R.id.action_stations);
+        } else {
+            menu.removeItem(R.id.action_forecast);
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
