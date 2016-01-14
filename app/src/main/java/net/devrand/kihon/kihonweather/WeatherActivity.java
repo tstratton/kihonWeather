@@ -14,22 +14,24 @@ import android.widget.FrameLayout;
 
 import net.devrand.kihon.kihonweather.event.FabEvent;
 
+import butterknife.Bind;
 import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
 
 public class WeatherActivity extends AppCompatActivity {
 
-    FrameLayout fragmentContainer;
+    @Bind(R.id.main_fragment) FrameLayout fragmentContainer;
+    @Bind(R.id.toolbar) Toolbar toolbar;
+    @Bind(R.id.fab) FloatingActionButton fab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_weather);
+        ButterKnife.bind(this);
 
-        Toolbar toolbar = ButterKnife.findById(this, R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = ButterKnife.findById(this, R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -37,7 +39,6 @@ public class WeatherActivity extends AppCompatActivity {
             }
         });
 
-        fragmentContainer = ButterKnife.findById(this, R.id.main_fragment);
         Fragment fragment = new WeatherActivityFragment();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.add(fragmentContainer.getId(), fragment).commit();

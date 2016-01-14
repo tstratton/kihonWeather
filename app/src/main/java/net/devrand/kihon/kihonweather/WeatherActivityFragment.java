@@ -64,7 +64,6 @@ public class WeatherActivityFragment extends Fragment {
     @Override
     public void onDestroyView() {
         ButterKnife.unbind(this);
-
         super.onDestroyView();
     }
 
