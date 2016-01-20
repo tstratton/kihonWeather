@@ -22,7 +22,5 @@
 
     <!-- This preference simply launches an intent when selected. Use this UI sparingly, per
      design guidelines. -->
-    <Preference android:title="@string/pref_title_import_export">
-        <intent android:action="android.settings.SYNC_SETTINGS" />
-    </Preference>
+    <Preference android:title="@string/pref_title_app_info" />
 </PreferenceScreen>

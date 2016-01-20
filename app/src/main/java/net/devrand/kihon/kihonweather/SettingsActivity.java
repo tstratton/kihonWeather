@@ -2,7 +2,9 @@ package net.devrand.kihon.kihonweather;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.ListPreference;
@@ -10,6 +12,7 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.preference.PreferenceScreen;
 import android.support.v7.app.ActionBar;
 
 import java.util.List;
@@ -147,6 +150,19 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // guidelines.
             bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_key_api_key)));
             bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_key_zip_code)));
+        }
+
+        @Override
+        public boolean onPreferenceTreeClick (PreferenceScreen preferenceScreen, Preference preference) {
+            if (preference.getTitleRes() == R.string.pref_title_app_info) {
+                //redirect user to app Settings, from http://stackoverflow.com/a/17167502
+                Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                intent.addCategory(Intent.CATEGORY_DEFAULT);
+                intent.setData(Uri.parse("package:" + getActivity().getPackageName()));
+                startActivity(intent);
+                return true;
+            }
+            return super.onPreferenceTreeClick(preferenceScreen, preference);
         }
     }
 }
