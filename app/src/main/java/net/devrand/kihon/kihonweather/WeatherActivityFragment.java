@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -45,6 +46,9 @@ public class WeatherActivityFragment extends Fragment {
     @Bind(R.id.forecastList)
     RecyclerView forecastList;
 
+    @Bind(R.id.swipeRefresh)
+    SwipeRefreshLayout swipeRefreshLayout;
+
     public WeatherActivityFragment() {
     }
 
@@ -54,10 +58,34 @@ public class WeatherActivityFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_weather, container, false);
         ButterKnife.bind(this, root);
 
-        forecastList.setVisibility(View.GONE);
+        swipeRefreshLayout.setVisibility(View.GONE);
 
         forecastList.setLayoutManager(new LinearLayoutManager(getContext()));
         forecastList.setAdapter(new ForecastAdapter());
+
+        // from http://stackoverflow.com/a/25183693
+        forecastList.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                int topRowVerticalPosition =
+                        (recyclerView == null || recyclerView.getChildCount() == 0) ? 0 : recyclerView.getChildAt(0).getTop();
+                swipeRefreshLayout.setEnabled(topRowVerticalPosition >= 0);
+
+            }
+
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+        });
+
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                EventBus.getDefault().post(new FabEvent());
+            }
+        });
+
         return root;
     }
 
@@ -115,10 +143,11 @@ public class WeatherActivityFragment extends Fragment {
         protected void onPreExecute() {
             textView.setText("Getting Data..");
             textCard.setVisibility(View.VISIBLE);
-            forecastList.setVisibility(View.GONE);
+            swipeRefreshLayout.setVisibility(View.GONE);
         }
 
         protected void onPostExecute(AllData data) {
+            Log.d(TAG, "Got data");
             StringBuilder text = new StringBuilder();
             try {
                 if (data.hasError()) {
@@ -130,7 +159,7 @@ public class WeatherActivityFragment extends Fragment {
                     textCard.setVisibility(View.VISIBLE);
                 } else {
                     ((ForecastAdapter) forecastList.getAdapter()).addData(data);
-                    forecastList.setVisibility(View.VISIBLE);
+                    swipeRefreshLayout.setVisibility(View.VISIBLE);
                     textCard.setVisibility(View.GONE);
                 }
             } catch (Exception ex) {
@@ -146,6 +175,7 @@ public class WeatherActivityFragment extends Fragment {
             text.append(pref.getString(getString(R.string.pref_key_api_key), getString(R.string.pref_default_api_key)));
             text.append("'");
             textView.setText(text);
+            swipeRefreshLayout.setRefreshing(false);
         }
     }
 
