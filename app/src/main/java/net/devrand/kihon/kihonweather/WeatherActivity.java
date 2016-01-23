@@ -1,7 +1,9 @@
 package net.devrand.kihon.kihonweather;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -11,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import net.devrand.kihon.kihonweather.event.FabEvent;
 
@@ -42,6 +45,13 @@ public class WeatherActivity extends AppCompatActivity {
         Fragment fragment = new WeatherActivityFragment();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.add(fragmentContainer.getId(), fragment).commit();
+
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+
+        if (getString(R.string.pref_default_api_key).equals(pref.getString(getString(R.string.pref_key_api_key), getString(R.string.pref_default_api_key)))) {
+            Toast.makeText(this, "Please set a valid Wunderground API Key", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, SettingsActivity.class));
+        }
     }
 
     @Override
