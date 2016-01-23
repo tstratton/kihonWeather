@@ -15,4 +15,8 @@
         android:id="@+id/action_stations"
         android:title="@string/action_stations"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_locations"
+        android:title="@string/action_locations"
+        app:showAsAction="never" />
 </menu>

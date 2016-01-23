@@ -69,6 +69,8 @@ public class WeatherActivity extends AppCompatActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
+        Fragment fragment;
+        FragmentTransaction transaction;
 
         switch (id) {
             case R.id.action_settings:
@@ -78,8 +80,15 @@ public class WeatherActivity extends AppCompatActivity {
                 getSupportFragmentManager().popBackStack();
                 return true;
             case R.id.action_stations:
-                Fragment fragment = new StationSelectionFragment();
-                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                fragment = new StationSelectionFragment();
+                transaction = getSupportFragmentManager().beginTransaction();
+                transaction.replace(fragmentContainer.getId(), fragment)
+                        .addToBackStack(null)
+                        .commit();
+                return true;
+            case R.id.action_locations:
+                fragment = new AutoCompleteFragment();
+                transaction = getSupportFragmentManager().beginTransaction();
                 transaction.replace(fragmentContainer.getId(), fragment)
                         .addToBackStack(null)
                         .commit();
