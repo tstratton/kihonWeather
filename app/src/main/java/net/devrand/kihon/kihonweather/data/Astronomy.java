@@ -19,4 +19,14 @@ public class Astronomy {
     public String getSunset() {
         return String.format("%s:%s", sunset.hour, sunset.minute);
     }
+
+    public boolean afterSunset(int hour, int minute) {
+        if (hour > Integer.parseInt(sunset.hour, 10)) {
+            return true;
+        }
+        if (hour < Integer.parseInt(sunset.hour, 10)) {
+            return false;
+        }
+        return (Integer.parseInt(sunset.minute, 10) > minute);
+    }
 }

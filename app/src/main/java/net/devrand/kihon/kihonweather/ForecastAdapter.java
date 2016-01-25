@@ -28,6 +28,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
@@ -233,8 +234,15 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             temp = temp.replace(" (", "\n(");
             text_temperature.setText(temp);
             text_status.setText(data.current_observation.weather);
-            text_sunrise.setText("Sunrise: " + data.sun_phase.getSunrise());
-            text_sunset.setText("Sunset: " + data.sun_phase.getSunset());
+            Calendar now = Calendar.getInstance();
+            //FIXME assumes timezones are the same
+            if (data.sun_phase.afterSunset(now.get(Calendar.HOUR_OF_DAY), now.get(Calendar.MINUTE))) {
+                text_sunrise.setText("Sunset: " + data.sun_phase.getSunset());
+                text_sunset.setText("Sunrise: around " + data.sun_phase.getSunrise());
+            } else {
+                text_sunrise.setText("Sunrise: " + data.sun_phase.getSunrise());
+                text_sunset.setText("Sunset: " + data.sun_phase.getSunset());
+            }
             long observation_time_ms = data.current_observation.observation_epoch * 1000;
             CharSequence timeString = DateUtils.getRelativeDateTimeString(text_time.getContext(), observation_time_ms,
                     DateUtils.MINUTE_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, DateUtils.FORMAT_ABBREV_ALL);
