@@ -10,12 +10,13 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_margin="@dimen/margin_medium">
 
             <com.jjoe64.graphview.GraphView
                 android:id="@+id/graph"
-                android:layout_width="1000dp"
-                android:layout_height="200dp" />
+                android:layout_width="1032dp"
+                android:layout_height="232dp" />
         </FrameLayout>
     </HorizontalScrollView>
 </android.support.v7.widget.CardView>
