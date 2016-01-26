@@ -11,7 +11,7 @@
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="@dimen/margin_medium">
+            android:layout_margin="@dimen/margin_small">
 
             <com.jjoe64.graphview.GraphView
                 android:id="@+id/graph"

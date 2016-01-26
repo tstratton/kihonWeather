@@ -231,7 +231,6 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         void setup(AllData data) {
             text_location.setText(data.current_observation.display_location.full);
             String temp = data.current_observation.temperature_string;
-            temp = temp.replace(" (", "\n(");
             text_temperature.setText(temp);
             text_status.setText(data.current_observation.weather);
             Calendar now = Calendar.getInstance();
