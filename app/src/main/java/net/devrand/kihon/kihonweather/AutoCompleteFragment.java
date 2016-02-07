@@ -6,14 +6,18 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
+import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.facebook.stetho.okhttp.StethoInterceptor;
 import com.google.gson.Gson;
@@ -28,6 +32,7 @@ import net.devrand.kihon.kihonweather.event.StationClickEvent;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -48,11 +53,13 @@ public class AutoCompleteFragment extends Fragment {
     TextView textView;
     @Bind(R.id.text_card)
     View textCard;
+    @Bind(R.id.auto_list)
+    ListView autoList;
+    @Bind(R.id.edit_text)
+    EditText editText;
 
-    @Bind(R.id.auto_text)
-    AutoCompleteTextView autoText;
     ArrayAdapter<AutoCompleteItem> adapter;
-    AutoCompleteItem[] emptyItem = new AutoCompleteItem[0];
+    ArrayList<AutoCompleteItem> items = new ArrayList<>();
 
     DelayedData delayed;
 
@@ -65,25 +72,24 @@ public class AutoCompleteFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_autocomplete, container, false);
         ButterKnife.bind(this, root);
 
-        adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, emptyItem);
-        autoText.setAdapter(adapter);
-        autoText.setThreshold(2);
+        adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, items);
+        autoList.setAdapter(adapter);
+        textCard.setVisibility(View.GONE);
 
-        autoText.addTextChangedListener(new TextWatcher() {
+        //FIXME get soft keyboard to show
+
+        editText.addTextChangedListener(new TextWatcher() {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 Log.d(TAG, "onTextChanged " + s.toString());
 
-                autoText.removeCallbacks(delayed);
-                if (s.toString().length() < 1) {
-                    return;
-                }
+                editText.removeCallbacks(delayed);
                 if (delayed == null) {
                     delayed = new DelayedData();
                 }
                 delayed.query = s.toString();
-                autoText.postDelayed(delayed, AUTOCOMPLETE_DELAY_MS);
+                editText.postDelayed(delayed, AUTOCOMPLETE_DELAY_MS);
             }
 
             @Override
@@ -98,6 +104,21 @@ public class AutoCompleteFragment extends Fragment {
             }
         });
 
+        autoList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                AutoCompleteItem item = (AutoCompleteItem) adapterView.getItemAtPosition(position);
+                if (item.l == null) {
+                    return;
+                }
+                SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getContext());
+                pref.edit()
+                        .putString(getString(R.string.pref_key_zip_code), item.l)
+                        .commit();
+                Toast.makeText(getContext(), "Location updated to\n" + item.name, Toast.LENGTH_SHORT).show();
+            }
+        });
+
         return root;
     }
 
@@ -106,6 +127,12 @@ public class AutoCompleteFragment extends Fragment {
 
         @Override
         public void run() {
+            if (TextUtils.isEmpty(query)) {
+                Log.d(TAG, "delayed clear query");
+                adapter.clear();
+                adapter.notifyDataSetChanged();
+                return;
+            }
             Log.d(TAG, "delayed run query: " + query);
             getTask = new GetDataTask();
             getTask.execute(BASE_URL, query);
@@ -115,7 +142,7 @@ public class AutoCompleteFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
-        autoText.removeCallbacks(delayed);
+        editText.removeCallbacks(delayed);
         ButterKnife.unbind(this);
         super.onDestroyView();
     }
@@ -128,7 +155,7 @@ public class AutoCompleteFragment extends Fragment {
 
     @Override
     public void onStop() {
-        autoText.removeCallbacks(delayed);
+        editText.removeCallbacks(delayed);
         EventBus.getDefault().unregister(this);
         super.onStop();
     }
@@ -167,8 +194,6 @@ public class AutoCompleteFragment extends Fragment {
         }
 
         protected void onPreExecute() {
-            textView.setText("Getting Data..");
-            textCard.setVisibility(View.VISIBLE);
         }
 
         protected void onPostExecute(AutoCompleteResult data) {
@@ -184,24 +209,5 @@ public class AutoCompleteFragment extends Fragment {
             adapter.addAll(data.RESULTS);
             adapter.notifyDataSetChanged();
         }
-    }
-
-    // This method will be called when a MessageEvent is posted
-    public void onEvent(FabEvent event) {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getContext());
-        new GetDataTask().execute(BASE_URL,
-                pref.getString(getString(R.string.pref_key_api_key), getString(R.string.pref_default_api_key)),
-                pref.getString(getString(R.string.pref_key_zip_code), getString(R.string.pref_default_zip_code)));
-    }
-
-    public void onEvent(StationClickEvent event) {
-        if (event.stationId == null) {
-            return;
-        }
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getContext());
-        pref.edit()
-                .putString(getString(R.string.pref_key_zip_code), event.stationId)
-                .commit();
-        EventBus.getDefault().post(new FabEvent());
     }
 }
