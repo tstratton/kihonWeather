@@ -210,4 +210,8 @@ public class AutoCompleteFragment extends Fragment {
             adapter.notifyDataSetChanged();
         }
     }
+
+    public void onEvent(FabEvent event) {
+        ;
+    }
 }
