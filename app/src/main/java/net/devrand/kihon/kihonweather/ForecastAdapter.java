@@ -199,7 +199,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     } else {
                         // show temperature for y values
                         double calcvalue = (value / 100) * (maxTemp - minTemp) + minTemp;
-                        return super.formatLabel(calcvalue, isValueX) + "\u00B0 C ";
+                        return super.formatLabel(calcvalue, isValueX) + "\u00B0 F ";
                     }
                 }
             });
