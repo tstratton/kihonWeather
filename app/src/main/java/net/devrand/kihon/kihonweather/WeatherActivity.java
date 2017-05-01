@@ -9,6 +9,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,6 +17,8 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import net.devrand.kihon.kihonweather.event.FabEvent;
+import net.devrand.kihon.kihonweather.event.SetTitleEvent;
+import net.devrand.kihon.kihonweather.event.StationClickEvent;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -23,9 +26,12 @@ import de.greenrobot.event.EventBus;
 
 public class WeatherActivity extends AppCompatActivity {
 
-    @Bind(R.id.main_fragment) FrameLayout fragmentContainer;
-    @Bind(R.id.toolbar) Toolbar toolbar;
-    @Bind(R.id.fab) FloatingActionButton fab;
+    @Bind(R.id.main_fragment)
+    FrameLayout fragmentContainer;
+    @Bind(R.id.toolbar)
+    Toolbar toolbar;
+    @Bind(R.id.fab)
+    FloatingActionButton fab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +58,18 @@ public class WeatherActivity extends AppCompatActivity {
             Toast.makeText(this, "Please set a valid Wunderground API Key", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(this, SettingsActivity.class));
         }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
     }
 
     @Override
@@ -82,6 +100,7 @@ public class WeatherActivity extends AppCompatActivity {
         Fragment fragment;
         FragmentTransaction transaction;
 
+        fab.setVisibility(View.VISIBLE);
         switch (id) {
             case R.id.action_settings:
                 startActivity(new Intent(this, SettingsActivity.class));
@@ -97,6 +116,7 @@ public class WeatherActivity extends AppCompatActivity {
                         .commit();
                 return true;
             case R.id.action_locations:
+                fab.setVisibility(View.GONE);
                 fragment = new AutoCompleteFragment();
                 transaction = getSupportFragmentManager().beginTransaction();
                 transaction.replace(fragmentContainer.getId(), fragment)
@@ -108,4 +128,10 @@ public class WeatherActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    public void onEvent(SetTitleEvent event) {
+        if (!TextUtils.isEmpty(event.title)) {
+            toolbar.setTitle(event.title);
+        }
+        toolbar.setSubtitle(event.subTitle);
+    }
 }

@@ -52,7 +52,7 @@ public class StationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         switch (viewType) {
             case TYPE_STATION:
-                return new StationHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.forecast_item, parent, false));        }
+                return new StationHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.station_item, parent, false));        }
         return null;
     }
 
@@ -130,7 +130,6 @@ public class StationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     static class StationHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView title;
         TextView description;
-        ImageView icon;
         String stationId;
         boolean isPwsStation;
 
@@ -138,13 +137,11 @@ public class StationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             super(row);
             title = ButterKnife.findById(row, R.id.forecast_title);
             description = ButterKnife.findById(row, R.id.forecast_description);
-            icon = ButterKnife.findById(row, R.id.forecast_icon);
         }
 
         void setup(WeatherStation data, String currentStationId) {
             isPwsStation = data.id != null;
             stationId = isPwsStation ? data.id : data.icao;
-            icon.setVisibility(View.GONE);
             title.setText(data.city + ", " + data.state);
             description.setText(isPwsStation ? data.neighborhood : data.icao);
             boolean isCurrentStation = currentStationId.equalsIgnoreCase(stationId);

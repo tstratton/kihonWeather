@@ -6,33 +6,24 @@
     android:layout_height="wrap_content"
     app:cardUseCompatPadding="true">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:orientation="horizontal"
         android:padding="@dimen/margin_small">
-
-        <ImageView
-            android:id="@+id/forecast_icon"
-            android:layout_width="@dimen/forecast_icon_size"
-            android:layout_height="@dimen/forecast_icon_size"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true" />
 
         <TextView
             android:id="@+id/forecast_title"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_marginBottom="@dimen/margin_small"
-            android:layout_toRightOf="@id/forecast_icon"
-            android:gravity="center"
             android:textAllCaps="true"
+            android:layout_marginRight="16dp"
             tools:text="Someday" />
 
         <TextView
             android:id="@+id/forecast_description"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/forecast_icon"
             tools:text="XXX today with a change of blah" />
-    </RelativeLayout>
+    </LinearLayout>
 </android.support.v7.widget.CardView>

@@ -21,6 +21,7 @@ import com.squareup.okhttp.Response;
 
 import net.devrand.kihon.kihonweather.data.AllData;
 import net.devrand.kihon.kihonweather.event.FabEvent;
+import net.devrand.kihon.kihonweather.event.SetTitleEvent;
 import net.devrand.kihon.kihonweather.event.StationClickEvent;
 
 import java.io.IOException;
@@ -77,6 +78,13 @@ public class StationSelectionFragment extends Fragment {
     public void onStop() {
         EventBus.getDefault().unregister(this);
         super.onStop();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        EventBus.getDefault().post(new FabEvent());
+        EventBus.getDefault().post(SetTitleEvent.createSubTitleEvent(getString(R.string.action_stations)));
     }
 
     private class GetDataTask extends AsyncTask<String, Integer, AllData> {

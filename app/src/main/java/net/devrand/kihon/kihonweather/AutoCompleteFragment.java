@@ -1,5 +1,6 @@
 package net.devrand.kihon.kihonweather;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -28,6 +30,7 @@ import com.squareup.okhttp.Response;
 import net.devrand.kihon.kihonweather.data.AutoCompleteItem;
 import net.devrand.kihon.kihonweather.data.AutoCompleteResult;
 import net.devrand.kihon.kihonweather.event.FabEvent;
+import net.devrand.kihon.kihonweather.event.SetTitleEvent;
 import net.devrand.kihon.kihonweather.event.StationClickEvent;
 
 import java.io.IOException;
@@ -74,9 +77,6 @@ public class AutoCompleteFragment extends Fragment {
 
         adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, items);
         autoList.setAdapter(adapter);
-        textCard.setVisibility(View.GONE);
-
-        //FIXME get soft keyboard to show
 
         editText.addTextChangedListener(new TextWatcher() {
 
@@ -116,6 +116,14 @@ public class AutoCompleteFragment extends Fragment {
                         .putString(getString(R.string.pref_key_zip_code), item.l)
                         .commit();
                 Toast.makeText(getContext(), "Location updated to\n" + item.name, Toast.LENGTH_SHORT).show();
+
+                View focusedView = getActivity().getCurrentFocus();
+                //hide keyboard
+                if (focusedView != null) {
+                    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                }
+                getFragmentManager().popBackStack();
             }
         });
 
@@ -160,6 +168,12 @@ public class AutoCompleteFragment extends Fragment {
         super.onStop();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        EventBus.getDefault().post(SetTitleEvent.createSubTitleEvent(getString(R.string.action_locations)));
+    }
+
     private class GetDataTask extends AsyncTask<String, Integer, AutoCompleteResult> {
 
         protected AutoCompleteResult doInBackground(String... urls) {
@@ -194,19 +208,31 @@ public class AutoCompleteFragment extends Fragment {
         }
 
         protected void onPreExecute() {
+            textView.setText(R.string.getting_data);
         }
 
         protected void onPostExecute(AutoCompleteResult data) {
-            Log.d(TAG, "Got data " + (data != null && data.RESULTS != null ? data.RESULTS.size() : "null"));
-            StringBuilder text = new StringBuilder();
-            for (AutoCompleteItem item : data.RESULTS) {
-                text.append(item.name + " -- ");
+            boolean haveResults = data != null && data.RESULTS != null;
+            Log.d(TAG, "Got data " + (haveResults ? data.RESULTS.size() : "null"));
+
+            if (!haveResults) {
+                textView.setText(R.string.location_result_error);
+            } else if (data.RESULTS.size() < 1) {
+                textView.setText(R.string.location_result_empty);
+            } else {
+                textView.setText(getString(R.string.location_result_fmt, data.RESULTS.size()));
+                StringBuilder text = new StringBuilder();
+                for (AutoCompleteItem item : data.RESULTS) {
+                    text.append(item.name + " -- ");
+                }
+                Log.d(TAG, text.toString());
             }
-            Log.d(TAG, text.toString());
 
             //FIXME adapter not updating correctly -- threading issue?
             adapter.clear();
-            adapter.addAll(data.RESULTS);
+            if (haveResults) {
+                adapter.addAll(data.RESULTS);
+            }
             adapter.notifyDataSetChanged();
         }
     }
