@@ -16,13 +16,13 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#00ffff"
+                android:textColor="@color/accent"
                 android:layout_marginLeft="@dimen/margin_small"
                 android:text="Temp &#x00B0;F" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#0077cc"
+                android:textColor="@color/primary"
                 android:layout_marginLeft="@dimen/margin_medium"
                 android:text="% Chance of Precipitation" />
         </LinearLayout>

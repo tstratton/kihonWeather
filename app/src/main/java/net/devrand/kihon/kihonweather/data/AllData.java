@@ -20,14 +20,13 @@ public class AllData {
         return response.error;
     }
 
-    public class Response {
-        public String version;
-        public Error error;
-    }
-
-    public class Error {
-        public String type;
-        public String description;
+    public static AllData createError(String type, String description) {
+        AllData data = new AllData();
+        data.response = new Response();
+        data.response.error = new Error();
+        data.response.error.type = type;
+        data.response.error.description = description;
+        return data;
     }
 
     public class Hourly {

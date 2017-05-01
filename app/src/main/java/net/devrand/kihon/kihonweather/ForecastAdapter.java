@@ -161,13 +161,14 @@ public class ForecastAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             //System.out.format("After: Min %03.2f Max %03.2f\n", minTemp, maxTemp);
 
             BarGraphSeries<DataPoint> barGraphSeries = new BarGraphSeries<DataPoint>(precipPoints.toArray(new DataPoint[precipPoints.size()]));
+            barGraphSeries.setColor(itemView.getResources().getColor(R.color.primary));
             graph.addSeries(barGraphSeries);
             graph.getViewport().setYAxisBoundsManual(true);
             graph.getViewport().setMaxY(100);
             graph.getViewport().setMinY(0);
 
             LineGraphSeries<DataPoint> lineGraphSeries = new LineGraphSeries<DataPoint>(tempPoints.toArray(new DataPoint[tempPoints.size()]));
-            lineGraphSeries.setColor(Color.CYAN);
+            lineGraphSeries.setColor(itemView.getResources().getColor(R.color.accent));
             graph.getSecondScale().addSeries(lineGraphSeries);
             graph.getSecondScale().setMinY(minTemp);
             graph.getSecondScale().setMaxY(maxTemp);

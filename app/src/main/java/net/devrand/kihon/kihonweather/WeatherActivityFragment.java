@@ -25,6 +25,7 @@ import net.devrand.kihon.kihonweather.event.FabEvent;
 import net.devrand.kihon.kihonweather.event.StationClickEvent;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -48,6 +49,8 @@ public class WeatherActivityFragment extends Fragment {
 
     @Bind(R.id.swipeRefresh)
     SwipeRefreshLayout swipeRefreshLayout;
+
+    boolean displayApiKey = false;
 
     public WeatherActivityFragment() {
     }
@@ -132,6 +135,9 @@ public class WeatherActivityFragment extends Fragment {
                 return data;
             } catch (IOException ex) {
                 ex.printStackTrace();
+                if (ex instanceof UnknownHostException) {
+                    return AllData.createError("Network Error", "Unable to contact server");
+                }
                 return null;
             }
         }
@@ -151,7 +157,7 @@ public class WeatherActivityFragment extends Fragment {
             StringBuilder text = new StringBuilder();
             try {
                 if (data.hasError()) {
-                    text.append("Got error\n");
+                    text.append("Got error:\n");
                     text.append(data.getError().type);
                     text.append("\n");
                     text.append(data.getError().description);
@@ -170,11 +176,13 @@ public class WeatherActivityFragment extends Fragment {
                 text.append(ex.toString());
                 text.append("\n");
             }
-            text.append("API key '");
-            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getContext());
-            text.append(pref.getString(getString(R.string.pref_key_api_key), getString(R.string.pref_default_api_key)));
-            text.append("'");
-            textView.setText(text);
+            if (displayApiKey) {
+                text.append("API key '");
+                SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getContext());
+                text.append(pref.getString(getString(R.string.pref_key_api_key), getString(R.string.pref_default_api_key)));
+                text.append("'");
+            }
+            textView.setText(text.toString().trim());
             swipeRefreshLayout.setRefreshing(false);
         }
     }
