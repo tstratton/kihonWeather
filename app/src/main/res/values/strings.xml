@@ -24,11 +24,12 @@
 
     <string name="pref_key_api_key">api_key</string>
     <string name="pref_title_api_key">Wunderground API Key</string>
-    <string name="pref_default_api_key">XXXX_WUNDERGROUND_API_KEY_XXXX</string>
+    <string name="pref_default_api_key_bad">XXXX_WUNDERGROUND_API_KEY_XXXX</string>
+    <string name="pref_default_api_key">fd29c0623b94099c</string>
 
     <string name="pref_key_zip_code">zip_code</string>
     <string name="pref_title_zip_code">Zip Code</string>
-    <string name="pref_default_zip_code">90210</string>
+    <string name="pref_default_zip_code">98101</string>
 
     <string name="pref_title_app_info">App Info</string>
 </resources>

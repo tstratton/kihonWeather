@@ -54,7 +54,7 @@ public class WeatherActivity extends AppCompatActivity {
 
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
 
-        if (getString(R.string.pref_default_api_key).equals(pref.getString(getString(R.string.pref_key_api_key), getString(R.string.pref_default_api_key)))) {
+        if (pref.getString(getString(R.string.pref_key_api_key), getString(R.string.pref_default_api_key)).contains("XXXX")) {
             Toast.makeText(this, "Please set a valid Wunderground API Key", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(this, SettingsActivity.class));
         }
